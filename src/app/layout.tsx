@@ -1,8 +1,15 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Outfit, Inter } from "next/font/google";
 import "./globals.css";
 import NavigationProgress from "@/components/NavigationProgress";
 import { Providers } from "@/components/Providers";
+import JsonLd from "@/components/JsonLd";
+import {
+  defaultMetadata,
+  organizationSchema,
+  websiteSchema,
+  educationalOrganizationSchema,
+} from "@/lib/seo";
 
 const outfit = Outfit({
   variable: "--font-outfit",
@@ -16,9 +23,16 @@ const inter = Inter({
   weight: ["300", "400", "500", "600", "700", "800", "900"],
 });
 
-export const metadata: Metadata = {
-  title: "LKnight Productions - Learning Management System",
-  description: "Master new skills with expert-led courses",
+export const metadata: Metadata = defaultMetadata;
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#000E51" },
+  ],
 };
 
 export default function RootLayout({
@@ -28,9 +42,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${outfit.variable} ${inter.variable} antialiased`}
-      >
+      <head>
+        <JsonLd data={organizationSchema} />
+        <JsonLd data={websiteSchema} />
+        <JsonLd data={educationalOrganizationSchema} />
+      </head>
+      <body className={`${outfit.variable} ${inter.variable} antialiased`}>
         <Providers>
           <NavigationProgress />
           {children}

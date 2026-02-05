@@ -1,7 +1,17 @@
+import { Metadata } from "next";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import MeetTheTeam from "@/components/MeetTheTeam";
 import Image from "next/image";
+import { createMetadata } from "@/lib/seo";
+
+export const metadata: Metadata = createMetadata({
+  title: "About Us - Our Mission & Story",
+  description:
+    "Learn about LKnight Learning Hub's mission to democratize education. Founded in 2020, we serve 50,000+ learners across 150+ countries with 500+ expert-led courses.",
+  keywords: ["about lknight", "our story", "education mission", "learning community"],
+  canonical: "/about",
+});
 
 export default function AboutPage() {
   return (
