@@ -1,12 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { contactApi } from "@/lib/api";
+import { useAuth } from "@/context/AuthContext";
 
 export default function ContactPage() {
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -20,6 +22,18 @@ export default function ContactPage() {
     type: "success" | "error";
     message: string;
   } | null>(null);
+
+  // Pre-fill form with logged-in user data
+  useEffect(() => {
+    if (user) {
+      setFormData((prev) => ({
+        ...prev,
+        firstName: user.firstName || prev.firstName,
+        lastName: user.lastName || prev.lastName,
+        email: user.email || prev.email,
+      }));
+    }
+  }, [user]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -44,9 +58,9 @@ export default function ContactPage() {
         message: response.message || "Message sent successfully! We'll get back to you soon.",
       });
       setFormData({
-        firstName: "",
-        lastName: "",
-        email: "",
+        firstName: user?.firstName || "",
+        lastName: user?.lastName || "",
+        email: user?.email || "",
         phone: "",
         subject: "general",
         message: "",
@@ -240,7 +254,8 @@ export default function ContactPage() {
                       name="firstName"
                       value={formData.firstName}
                       onChange={handleInputChange}
-                      className="w-full border-b border-gray-300 pb-2 text-sm text-gray-900 focus:outline-none focus:border-[#1a1f4e] transition-colors bg-transparent"
+                      placeholder="John"
+                      className="w-full border-b border-gray-300 pb-2 text-sm text-gray-900 focus:outline-none focus:border-[#1a1f4e] transition-colors bg-transparent placeholder:text-gray-400"
                     />
                   </div>
                   <div>
@@ -269,12 +284,13 @@ export default function ContactPage() {
                       name="email"
                       value={formData.email}
                       onChange={handleInputChange}
-                      className="w-full border-b border-gray-300 pb-2 text-sm text-gray-900 focus:outline-none focus:border-[#1a1f4e] transition-colors bg-transparent"
+                      placeholder="john@example.com"
+                      className="w-full border-b border-gray-300 pb-2 text-sm text-gray-900 focus:outline-none focus:border-[#1a1f4e] transition-colors bg-transparent placeholder:text-gray-400"
                     />
                   </div>
                   <div>
                     <label className="block text-xs text-gray-500 mb-2">
-                      Phone Number
+                      Phone Number <span className="text-gray-400">(Optional)</span>
                     </label>
                     <input
                       type="tel"
