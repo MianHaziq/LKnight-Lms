@@ -299,12 +299,43 @@ export interface Lesson {
   title: string;
   description?: string;
   videoUrl?: string;
-  content?: string;  // Base64 encoded video/image
+  content?: string;  // Base64 encoded video/image (deprecated - use Bunny Stream)
   contentType?: string;  // MIME type
   duration: number;
   order: number;
   moduleId?: string;
   documents?: Document[];
+  // Bunny Stream fields
+  bunnyVideoId?: string;
+  bunnyLibraryId?: string;
+  videoStatus?: string;  // none | uploaded | processing | encoding | finished | failed
+  thumbnailUrl?: string;
+  embedUrl?: string;  // Signed embed URL (included in getLessonById response)
+}
+
+export interface VideoUploadResponse {
+  lessonId: string;
+  bunnyVideoId: string;
+  videoStatus: string;
+  thumbnailUrl: string;
+}
+
+export interface VideoUrlResponse {
+  embedUrl: string;
+  expires: number;
+  videoStatus: string;
+  thumbnailUrl: string;
+}
+
+export interface VideoStatusResponse {
+  videoStatus: string;
+  bunnyVideoId: string;
+  thumbnailUrl: string;
+  live?: {
+    status: number;
+    encodeProgress: number;
+    length: number;
+  };
 }
 
 export interface Module {
@@ -428,6 +459,57 @@ export const lessonApi = {
 
   reorder: (moduleId: string, lessons: { id: string }[]) =>
     api.patch<void>(`/modules/${moduleId}/lessons/reorder`, { lessons }),
+
+  // Bunny Stream video methods
+  uploadVideo: (
+    lessonId: string,
+    file: File,
+    onProgress?: (percent: number) => void
+  ): Promise<ApiResponse<VideoUploadResponse>> => {
+    return new Promise((resolve, reject) => {
+      const formData = new FormData();
+      formData.append('video', file);
+
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', `${API_BASE_URL}/lessons/${lessonId}/video`);
+
+      const token = getAuthToken();
+      if (token) {
+        xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+      }
+
+      xhr.upload.onprogress = (event) => {
+        if (event.lengthComputable && onProgress) {
+          const percent = Math.round((event.loaded / event.total) * 100);
+          onProgress(percent);
+        }
+      };
+
+      xhr.onload = () => {
+        try {
+          const data = JSON.parse(xhr.responseText);
+          if (xhr.status >= 200 && xhr.status < 300) {
+            resolve(data);
+          } else {
+            reject(new Error(data.message || 'Upload failed'));
+          }
+        } catch {
+          reject(new Error('Failed to parse response'));
+        }
+      };
+
+      xhr.onerror = () => reject(new Error('Network error during upload'));
+      xhr.onabort = () => reject(new Error('Upload cancelled'));
+
+      xhr.send(formData);
+    });
+  },
+
+  getVideoUrl: (lessonId: string) =>
+    api.get<VideoUrlResponse>(`/lessons/${lessonId}/video-url`),
+
+  getVideoStatus: (lessonId: string) =>
+    api.get<VideoStatusResponse>(`/lessons/${lessonId}/video-status`),
 };
 
 // Users API
@@ -564,6 +646,28 @@ export interface CheckoutCourse {
   enrollmentId?: string;
 }
 
+// Stripe checkout types
+export interface CheckoutSessionResponse {
+  sessionId: string;
+  sessionUrl: string;
+}
+
+export interface FreeEnrollmentResponse {
+  enrollmentId: string;
+  free: true;
+}
+
+export interface SessionEnrollment {
+  enrollmentId: string;
+  status: string;
+  course: {
+    id: string;
+    title: string;
+    slug: string;
+    thumbnail?: string;
+  };
+}
+
 export const enrollmentApi = {
   // Get user's enrolled courses
   getMyCourses: () =>
@@ -581,7 +685,18 @@ export const enrollmentApi = {
   getCheckoutDetails: (courseId: string) =>
     api.get<CheckoutCourse>(`/enrollments/checkout/${courseId}`),
 
-  // Purchase/enroll in a single course
+  // Create Stripe checkout session (or enroll directly for free courses)
+  createCheckoutSession: (courseId: string) =>
+    api.post<CheckoutSessionResponse | FreeEnrollmentResponse>(
+      '/enrollments/create-checkout-session',
+      { courseId }
+    ),
+
+  // Check enrollment status by Stripe session ID (for polling after payment)
+  getSessionEnrollment: (sessionId: string) =>
+    api.get<SessionEnrollment>(`/enrollments/session/${sessionId}`),
+
+  // Legacy: Purchase/enroll in a single course (kept for backward compatibility)
   purchaseCourse: (courseId: string) =>
     api.post<{ enrollmentId: string; course: { id: string; title: string; slug: string } }>(`/enrollments/purchase/${courseId}`, {}),
 

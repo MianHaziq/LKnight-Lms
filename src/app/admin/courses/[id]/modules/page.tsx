@@ -10,6 +10,7 @@ import ConfirmModal from "@/components/admin/ConfirmModal";
 import { courseApi, moduleApi, lessonApi, documentApi, Module, Lesson, CourseDetails, Document as DocType } from "@/lib/api";
 import { useToast } from "@/components/ui/Toast";
 import { DocumentManager } from "@/components/admin";
+import VideoUploader from "@/components/admin/VideoUploader";
 
 interface ModuleWithExpanded extends Module {
   isExpanded: boolean;
@@ -883,15 +884,56 @@ export default function ModulesPage() {
                     placeholder="600"
                   />
                 </div>
-                <FileUploadField
-                  label="Lesson Content (Image/Video)"
-                  onChange={(e) => handleLessonFileChange(e, true)}
-                  preview={editLessonContentPreview}
-                  onClear={() => {
-                    setEditLessonData({ ...editLessonData, content: "", contentType: "" });
-                    setEditLessonContentPreview(null);
-                  }}
-                />
+                {/* Video Upload via Bunny Stream */}
+                {showEditLesson && (
+                  <VideoUploader
+                    lessonId={showEditLesson.lessonId}
+                    currentVideoStatus={
+                      modules
+                        .find((m) => m.id === showEditLesson.moduleId)
+                        ?.lessons.find((l) => l.id === showEditLesson.lessonId)
+                        ?.videoStatus
+                    }
+                    currentThumbnailUrl={
+                      modules
+                        .find((m) => m.id === showEditLesson.moduleId)
+                        ?.lessons.find((l) => l.id === showEditLesson.lessonId)
+                        ?.thumbnailUrl
+                    }
+                    currentBunnyVideoId={
+                      modules
+                        .find((m) => m.id === showEditLesson.moduleId)
+                        ?.lessons.find((l) => l.id === showEditLesson.lessonId)
+                        ?.bunnyVideoId
+                    }
+                    onUploadComplete={(data) => {
+                      // Update the lesson in local state with Bunny video info
+                      setModules((prev) =>
+                        prev.map((m) => {
+                          if (m.id === showEditLesson.moduleId) {
+                            return {
+                              ...m,
+                              lessons: m.lessons.map((l) =>
+                                l.id === showEditLesson.lessonId
+                                  ? {
+                                      ...l,
+                                      bunnyVideoId: data.bunnyVideoId,
+                                      videoStatus: data.videoStatus,
+                                      thumbnailUrl: data.thumbnailUrl,
+                                      content: undefined,
+                                      contentType: undefined,
+                                    }
+                                  : l
+                              ),
+                            };
+                          }
+                          return m;
+                        })
+                      );
+                      showToast("Video uploaded! Encoding will begin shortly.", "success");
+                    }}
+                  />
+                )}
 
                 {/* Lesson Documents */}
                 {showEditLesson && (
@@ -1070,15 +1112,11 @@ export default function ModulesPage() {
                           placeholder="600"
                         />
                       </div>
-                      <FileUploadField
-                        label="Lesson Content (Image/Video)"
-                        onChange={(e) => handleLessonFileChange(e, false)}
-                        preview={lessonContentPreview}
-                        onClear={() => {
-                          setNewLesson({ ...newLesson, content: "", contentType: "" });
-                          setLessonContentPreview(null);
-                        }}
-                      />
+                      <div className="bg-blue-50 border border-blue-200 rounded-xl px-4 py-3">
+                        <p className="text-xs text-blue-700">
+                          <span className="font-medium">Video upload:</span> Save the lesson first, then edit it to upload a video via Bunny Stream.
+                        </p>
+                      </div>
                       <div className="flex justify-end gap-2">
                         <AdminButton
                           variant="ghost"
@@ -1135,7 +1173,22 @@ export default function ModulesPage() {
                         </span>
 
                         {/* Content Thumbnail */}
-                        {lesson.content ? (
+                        {lesson.thumbnailUrl && lesson.bunnyVideoId ? (
+                          <div className="w-10 h-10 rounded-lg overflow-hidden bg-gray-200 shrink-0 relative">
+                            <img src={lesson.thumbnailUrl} alt="" className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                            {lesson.videoStatus === "finished" && (
+                              <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border border-white" />
+                            )}
+                            {(lesson.videoStatus === "processing" || lesson.videoStatus === "encoding") && (
+                              <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                                <svg className="animate-spin h-4 w-4 text-white" viewBox="0 0 24 24">
+                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                                </svg>
+                              </div>
+                            )}
+                          </div>
+                        ) : lesson.content ? (
                           <div className="w-10 h-10 rounded-lg overflow-hidden bg-gray-200 shrink-0">
                             <ContentPreview content={lesson.content} contentType={lesson.contentType} className="w-full h-full object-cover" />
                           </div>

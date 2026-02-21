@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useState, useEffect, Suspense } from "react";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { enrollmentApi, CheckoutCourse } from "@/lib/api";
@@ -17,10 +17,12 @@ const formatLevel = (level: string) => {
   return level.charAt(0) + level.slice(1).toLowerCase();
 };
 
-export default function CheckoutPage() {
+function CheckoutContent() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const courseId = params.id as string;
+  const wasCanceled = searchParams.get("canceled") === "true";
 
   const [course, setCourse] = useState<CheckoutCourse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -52,23 +54,43 @@ export default function CheckoutPage() {
     }
   }, [courseId, router]);
 
+  // Show cancellation message if redirected back from Stripe
+  useEffect(() => {
+    if (wasCanceled) {
+      setError("Payment was canceled. You can try again when you're ready.");
+    }
+  }, [wasCanceled]);
+
   const handlePurchase = async () => {
     try {
       setIsPurchasing(true);
       setError(null);
 
-      const response = await enrollmentApi.purchaseCourse(courseId);
+      const response = await enrollmentApi.createCheckoutSession(courseId);
 
-      if (response.success) {
-        setSuccess(true);
-        // Wait a moment to show success message
-        setTimeout(() => {
-          router.push(`/dashboard/courses/${courseId}`);
-        }, 2000);
+      if (response.success && response.data) {
+        // FREE COURSE: enrolled directly, no Stripe needed
+        if ("free" in response.data && response.data.free) {
+          setSuccess(true);
+          setTimeout(() => {
+            router.push(`/dashboard/courses/${courseId}`);
+          }, 2000);
+          return;
+        }
+
+        // PAID COURSE: redirect to Stripe Checkout
+        if ("sessionUrl" in response.data && response.data.sessionUrl) {
+          window.location.href = response.data.sessionUrl;
+          // Don't setIsPurchasing(false) — page is navigating away
+          return;
+        }
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Purchase failed. Please try again.");
-    } finally {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Failed to start checkout. Please try again."
+      );
       setIsPurchasing(false);
     }
   };
@@ -116,7 +138,7 @@ export default function CheckoutPage() {
 
   if (!course) return null;
 
-  // Success state
+  // Success state (for free courses)
   if (success) {
     return (
       <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-12 py-8">
@@ -128,7 +150,7 @@ export default function CheckoutPage() {
             </svg>
           </div>
           <h2 className="text-2xl sm:text-3xl font-bold text-[#000E51] mb-3">
-            Payment Successful!
+            Enrollment Successful!
           </h2>
           <p className="text-gray-600 mb-2">
             You now have access to <span className="font-semibold text-[#000E51]">{course.title}</span>
@@ -147,6 +169,8 @@ export default function CheckoutPage() {
       </div>
     );
   }
+
+  const isFree = course.price === 0;
 
   return (
     <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-12 py-6 sm:py-8">
@@ -282,11 +306,17 @@ export default function CheckoutPage() {
             {/* Price */}
             <div className="text-center mb-6">
               <div className="flex items-baseline justify-center gap-1">
-                <span className="text-4xl font-bold text-[#000E51]">
-                  ${course.price.toFixed(2)}
-                </span>
+                {isFree ? (
+                  <span className="text-4xl font-bold text-green-600">Free</span>
+                ) : (
+                  <span className="text-4xl font-bold text-[#000E51]">
+                    ${course.price.toFixed(2)}
+                  </span>
+                )}
               </div>
-              <p className="text-sm text-gray-500 mt-1">One-time payment</p>
+              <p className="text-sm text-gray-500 mt-1">
+                {isFree ? "No payment required" : "One-time payment"}
+              </p>
             </div>
 
             {/* Error Message */}
@@ -308,7 +338,15 @@ export default function CheckoutPage() {
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
                   </svg>
-                  Processing...
+                  {isFree ? "Enrolling..." : "Redirecting to payment..."}
+                </>
+              ) : isFree ? (
+                <>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                    <polyline points="22 4 12 14.01 9 11.01"/>
+                  </svg>
+                  Enroll for Free
                 </>
               ) : (
                 <>
@@ -360,12 +398,37 @@ export default function CheckoutPage() {
                   <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
                   <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
                 </svg>
-                <span className="text-xs">Secure payment</span>
+                <span className="text-xs">
+                  {isFree ? "Secure enrollment" : "Secure payment powered by Stripe"}
+                </span>
               </div>
             </div>
           </div>
         </div>
       </div>
     </div>
+  );
+}
+
+export default function CheckoutPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-12 py-8">
+          <div className="animate-pulse">
+            <div className="h-8 bg-gray-200 rounded w-32 mb-8"></div>
+            <div className="grid lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-2 space-y-6">
+                <div className="h-64 bg-gray-200 rounded-2xl"></div>
+                <div className="h-32 bg-gray-200 rounded-xl"></div>
+              </div>
+              <div className="h-96 bg-gray-200 rounded-2xl"></div>
+            </div>
+          </div>
+        </div>
+      }
+    >
+      <CheckoutContent />
+    </Suspense>
   );
 }

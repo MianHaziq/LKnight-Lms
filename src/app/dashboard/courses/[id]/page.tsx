@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { courseApi, lessonApi, documentApi, CourseDetails, Module, Lesson, enrollmentApi, CheckoutCourse, Document as DocType } from "@/lib/api";
+import BunnyVideoPlayer from "@/components/BunnyVideoPlayer";
 
 // Format duration from seconds to mm:ss
 const formatDuration = (seconds: number) => {
@@ -515,6 +516,17 @@ function DocumentDownloadItem({
 
 // Video Player Component
 function VideoPlayer({ lesson }: { lesson: Lesson | null }) {
+  // Priority 1: Bunny Stream video (professional streaming)
+  if (lesson?.bunnyVideoId) {
+    return <BunnyVideoPlayer lesson={lesson} />;
+  }
+
+  // Priority 2 & 3: External URL or Base64 content (legacy player below)
+  return <LegacyVideoPlayer lesson={lesson} />;
+}
+
+// Legacy HTML5 video player for external URLs and Base64 content
+function LegacyVideoPlayer({ lesson }: { lesson: Lesson | null }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
