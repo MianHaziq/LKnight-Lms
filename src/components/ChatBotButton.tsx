@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 
 const HIDDEN_ROUTES = [
@@ -19,9 +19,6 @@ declare global {
         floatwindow?: {
           visible: (mode: "show" | "hide") => void;
         };
-        chat?: {
-          waittime: (time: number) => void;
-        };
       };
     };
   }
@@ -31,6 +28,7 @@ let scriptsLoaded = false;
 
 export default function ChatBotButton() {
   const pathname = usePathname();
+  const wasHiddenRef = useRef(false);
 
   const shouldHide = HIDDEN_ROUTES.some(
     (route) => pathname === route || pathname.startsWith(route + "/")
@@ -41,13 +39,11 @@ export default function ChatBotButton() {
     if (scriptsLoaded) return;
     scriptsLoaded = true;
 
-    // Initialize Zoho global object
     window.$zoho = window.$zoho || {};
     window.$zoho.salesiq = window.$zoho.salesiq || {
       ready: function () {},
     };
 
-    // Load the widget script
     const script = document.createElement("script");
     script.id = "zsiqscript";
     script.src =
@@ -56,23 +52,26 @@ export default function ChatBotButton() {
     document.body.appendChild(script);
   }, []);
 
-  // Show/hide the widget based on route
+  // Only hide/show widget when transitioning between hidden and visible routes
   useEffect(() => {
-    const toggleWidget = () => {
-      if (window.$zoho?.salesiq?.floatwindow) {
-        window.$zoho.salesiq.floatwindow.visible(
-          shouldHide ? "hide" : "show"
-        );
+    const toggle = () => {
+      const fw = window.$zoho?.salesiq?.floatwindow;
+      if (!fw) return;
+
+      if (shouldHide) {
+        fw.visible("hide");
+        wasHiddenRef.current = true;
+      } else if (wasHiddenRef.current) {
+        // Only call "show" when coming back from a hidden route
+        fw.visible("show");
+        wasHiddenRef.current = false;
       }
     };
 
-    // Try immediately
-    toggleWidget();
-
-    // Also retry after a short delay (widget may not be ready yet)
-    const timeout = setTimeout(toggleWidget, 1500);
+    toggle();
+    const timeout = setTimeout(toggle, 1500);
     return () => clearTimeout(timeout);
-  }, [shouldHide, pathname]);
+  }, [shouldHide]);
 
   return null;
 }
