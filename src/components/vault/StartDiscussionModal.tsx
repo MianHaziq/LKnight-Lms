@@ -64,11 +64,11 @@ export default function StartDiscussionModal({
       />
 
       {/* Modal */}
-      <div className="relative w-full max-w-[500px] bg-[#0A1628] rounded-xl sm:rounded-2xl overflow-hidden shadow-2xl max-h-[90vh] overflow-y-auto">
+      <div className="relative w-full max-w-[500px] bg-white rounded-xl sm:rounded-2xl overflow-hidden shadow-2xl max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 sm:p-5 border-b border-white/10">
+        <div className="flex items-center justify-between p-4 sm:p-5 border-b border-gray-100">
           <div className="flex items-center gap-2 sm:gap-3">
-            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#FF6F00]/20 flex items-center justify-center">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#FF6F00]/10 flex items-center justify-center">
               <svg
                 width="18"
                 height="18"
@@ -87,10 +87,10 @@ export default function StartDiscussionModal({
               </svg>
             </div>
             <div>
-              <h2 className="text-white text-base sm:text-lg font-semibold">
+              <h2 className="text-[#000E51] text-base sm:text-lg font-semibold">
                 Start a Discussion
               </h2>
-              <p className="text-white/50 text-xs sm:text-sm">
+              <p className="text-gray-400 text-xs sm:text-sm">
                 {isAdmin ? "Post as Admin" : "Share anonymously with the community"}
               </p>
             </div>
@@ -99,7 +99,7 @@ export default function StartDiscussionModal({
           {/* Close Button */}
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors cursor-pointer"
+            className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors cursor-pointer"
           >
             <svg
               width="16"
@@ -110,7 +110,7 @@ export default function StartDiscussionModal({
             >
               <path
                 d="M18 6L6 18M6 6L18 18"
-                stroke="white"
+                stroke="#6b7280"
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -123,13 +123,13 @@ export default function StartDiscussionModal({
         <form onSubmit={handleSubmit} className="p-4 sm:p-5 space-y-4 sm:space-y-5">
           {/* Category */}
           <div>
-            <label className="block text-white/70 text-sm font-medium mb-2">
+            <label className="block text-gray-700 text-sm font-medium mb-2">
               Category
             </label>
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="w-full bg-[#000E51] border border-white/10 rounded-lg px-3 sm:px-4 py-2.5 sm:py-3 text-white text-sm focus:outline-none focus:border-[#FF6F00] transition-colors cursor-pointer"
+              className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 sm:px-4 py-2.5 sm:py-3 text-gray-800 text-sm focus:outline-none focus:border-[#FF6F00] transition-colors cursor-pointer"
               required
             >
               <option value="" disabled>
@@ -145,7 +145,7 @@ export default function StartDiscussionModal({
 
           {/* Title */}
           <div>
-            <label className="block text-white/70 text-sm font-medium mb-2">
+            <label className="block text-gray-700 text-sm font-medium mb-2">
               Discussion Title
             </label>
             <input
@@ -153,14 +153,14 @@ export default function StartDiscussionModal({
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="What would you like to discuss?"
-              className="w-full bg-[#000E51] border border-white/10 rounded-lg px-3 sm:px-4 py-2.5 sm:py-3 text-white text-sm placeholder:text-white/30 focus:outline-none focus:border-[#FF6F00] transition-colors"
+              className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 sm:px-4 py-2.5 sm:py-3 text-gray-800 text-sm placeholder:text-gray-400 focus:outline-none focus:border-[#FF6F00] transition-colors"
               required
             />
           </div>
 
           {/* Description */}
           <div>
-            <label className="block text-white/70 text-sm font-medium mb-2">
+            <label className="block text-gray-700 text-sm font-medium mb-2">
               Description
             </label>
             <textarea
@@ -168,7 +168,7 @@ export default function StartDiscussionModal({
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Share more details about your question or experience..."
               rows={4}
-              className="w-full bg-[#000E51] border border-white/10 rounded-lg px-3 sm:px-4 py-2.5 sm:py-3 text-white text-sm placeholder:text-white/30 focus:outline-none focus:border-[#FF6F00] transition-colors resize-none"
+              className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 sm:px-4 py-2.5 sm:py-3 text-gray-800 text-sm placeholder:text-gray-400 focus:outline-none focus:border-[#FF6F00] transition-colors resize-none"
               required
             />
           </div>
@@ -201,7 +201,7 @@ export default function StartDiscussionModal({
                   strokeLinejoin="round"
                 />
               </svg>
-              <p className="text-white/60 text-xs leading-relaxed">
+              <p className="text-gray-500 text-xs leading-relaxed">
                 Your identity is protected. Your post will be shared anonymously
                 with other members. We never share your real identity.
               </p>
@@ -227,7 +227,7 @@ export default function StartDiscussionModal({
                 <path d="M12 8V12" stroke="#FF6F00" strokeWidth="1.5" strokeLinecap="round" />
                 <circle cx="12" cy="16" r="1" fill="#FF6F00" />
               </svg>
-              <p className="text-white/60 text-xs leading-relaxed">
+              <p className="text-gray-500 text-xs leading-relaxed">
                 You are posting as <span className="text-[#FF6F00] font-medium">Admin</span>. Your post will be visible with the Admin badge.
               </p>
             </div>
@@ -235,7 +235,7 @@ export default function StartDiscussionModal({
 
           {/* Error */}
           {error && (
-            <p className="text-red-400 text-xs">{error}</p>
+            <p className="text-red-500 text-xs">{error}</p>
           )}
 
           {/* Submit Button */}
