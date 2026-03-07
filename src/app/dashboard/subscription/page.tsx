@@ -304,12 +304,12 @@ export default function SubscriptionManagementPage() {
           {/* Actions */}
           {isOwner && (
             <div className="flex flex-wrap gap-3">
-              <Link
+              {/* <Link
                 href="/pricing"
                 className="px-5 py-2.5 bg-[#000E51] hover:bg-[#001570] text-white font-semibold rounded-xl text-sm transition-colors"
               >
                 Change Plan
-              </Link>
+              </Link> */}
               {!subscription.cancelAtPeriodEnd && subscription.status === "ACTIVE" && (
                 <button
                   onClick={() => setShowCancelConfirm(true)}
