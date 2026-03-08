@@ -235,8 +235,10 @@ export interface RecentEnrollment {
   course: {
     id: string;
     title: string;
-    price: number;
+    thumbnail?: string;
+    price?: number;
   };
+  planName?: string | null;
   enrolledAt: string;
   status: string;
 }
@@ -244,10 +246,38 @@ export interface RecentEnrollment {
 export interface TopCourse {
   id: string;
   title: string;
+  thumbnail?: string;
   enrollments: number;
-  revenue: number;
+  revenue?: number;
   trend: number;
   rating: number;
+}
+
+export interface SubscriptionRecord {
+  id: string;
+  user: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
+  planName: string;
+  billingCycle: string;
+  amount: number;
+  subscribedAt: string;
+  status: string;
+}
+
+export interface SubscriptionsListResponse {
+  data: SubscriptionRecord[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+    hasNext: boolean;
+    hasPrev: boolean;
+  };
 }
 
 export const dashboardApi = {
@@ -262,6 +292,17 @@ export const dashboardApi = {
 
   getRecentEnrollments: (limit?: number) =>
     api.get<RecentEnrollment[]>(`/admin/dashboard/recent-enrollments${limit ? `?limit=${limit}` : ''}`),
+
+  getRecentSubscriptions: (limit?: number) =>
+    api.get<SubscriptionRecord[]>(`/admin/dashboard/recent-subscriptions${limit ? `?limit=${limit}` : ''}`),
+
+  getSubscriptionsList: (page?: number, limit?: number) => {
+    const params = new URLSearchParams();
+    if (page != null) params.set('page', String(page));
+    if (limit != null) params.set('limit', String(limit));
+    const qs = params.toString();
+    return api.get<SubscriptionsListResponse>(`/admin/dashboard/subscriptions${qs ? `?${qs}` : ''}`);
+  },
 
   getTopCourses: (limit?: number) =>
     api.get<TopCourse[]>(`/admin/dashboard/top-courses${limit ? `?limit=${limit}` : ''}`),
@@ -305,9 +346,24 @@ export const analyticsApi = {
       `/admin/dashboard/analytics/enrollments-by-course${limit ? `?limit=${limit}` : ''}`
     ),
 
+  getSubscriptionsByPlan: (period?: string, limit?: number) => {
+    const params = new URLSearchParams();
+    if (period) params.set('period', period);
+    if (limit != null) params.set('limit', String(limit));
+    const qs = params.toString();
+    return api.get<ChartData[]>(
+      `/admin/dashboard/analytics/subscriptions-by-plan${qs ? `?${qs}` : ''}`
+    );
+  },
+
   getRevenueByCategory: () =>
     api.get<(ChartData & { color?: string })[]>(
       `/admin/dashboard/analytics/revenue-by-category`
+    ),
+
+  getRevenueByPlan: (period?: string) =>
+    api.get<(ChartData & { color?: string })[]>(
+      `/admin/dashboard/analytics/revenue-by-plan${period ? `?period=${period}` : ''}`
     ),
 
   getTopCourses: (limit?: number) =>

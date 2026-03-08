@@ -28,8 +28,8 @@ export default function AnalyticsPage() {
   const [userGrowthData, setUserGrowthData] = useState<ChartData[]>([]);
   const [userGrowthTrend, setUserGrowthTrend] = useState(0);
   const [enrollmentChartData, setEnrollmentChartData] = useState<ChartData[]>([]);
-  const [enrollmentsByCourse, setEnrollmentsByCourse] = useState<ChartData[]>([]);
-  const [revenueByCategory, setRevenueByCategory] = useState<{ name: string; value: number }[]>([]);
+  const [subscriptionsByPlan, setSubscriptionsByPlan] = useState<ChartData[]>([]);
+  const [revenueByPlan, setRevenueByPlan] = useState<{ name: string; value: number }[]>([]);
   const [topCourses, setTopCourses] = useState<TopCourse[]>([]);
 
   useEffect(() => {
@@ -42,16 +42,16 @@ export default function AnalyticsPage() {
           revenueRes,
           userGrowthRes,
           enrollmentChartRes,
-          enrollmentsCourseRes,
-          revenueCategoryRes,
+          subscriptionsByPlanRes,
+          revenueByPlanRes,
           topCoursesRes,
         ] = await Promise.all([
           analyticsApi.getOverview(period),
           analyticsApi.getRevenueChart(12),
           analyticsApi.getUserGrowth(12),
           analyticsApi.getEnrollmentChart(12),
-          analyticsApi.getEnrollmentsByCourse(8),
-          analyticsApi.getRevenueByCategory(),
+          analyticsApi.getSubscriptionsByPlan(period, 12),
+          analyticsApi.getRevenueByPlan(period),
           analyticsApi.getTopCourses(5),
         ]);
 
@@ -68,12 +68,12 @@ export default function AnalyticsPage() {
         if (enrollmentChartRes.success && enrollmentChartRes.data) {
           setEnrollmentChartData(enrollmentChartRes.data);
         }
-        if (enrollmentsCourseRes.success && enrollmentsCourseRes.data) {
-          setEnrollmentsByCourse(enrollmentsCourseRes.data);
+        if (subscriptionsByPlanRes.success && subscriptionsByPlanRes.data) {
+          setSubscriptionsByPlan(subscriptionsByPlanRes.data);
         }
-        if (revenueCategoryRes.success && revenueCategoryRes.data) {
-          setRevenueByCategory(
-            revenueCategoryRes.data.map((item) => ({
+        if (revenueByPlanRes.success && revenueByPlanRes.data) {
+          setRevenueByPlan(
+            revenueByPlanRes.data.map((item) => ({
               name: item.label,
               value: item.value,
             }))
@@ -111,10 +111,24 @@ export default function AnalyticsPage() {
         })()
       : 0;
 
-  const totalEnrollmentsByCourse = enrollmentsByCourse.reduce(
+  const totalSubscriptionsByPlan = subscriptionsByPlan.reduce(
     (sum, c) => sum + c.value,
     0
   );
+
+  const exportRevenueCsv = () => {
+    if (revenueData.length === 0) return;
+    const headers = "Month,Revenue (USD)\n";
+    const rows = revenueData.map((d) => `"${d.label}",${d.value}`).join("\n");
+    const csv = headers + rows;
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `revenue-analytics-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   // Loading skeleton
   if (isLoading) {
@@ -216,6 +230,7 @@ export default function AnalyticsPage() {
             variant="outline"
             size="sm"
             className="hidden sm:inline-flex"
+            onClick={exportRevenueCsv}
             icon={
               <svg
                 width="16"
@@ -306,7 +321,7 @@ export default function AnalyticsPage() {
           iconBgColor="bg-purple-50"
         />
         <StatsCard
-          title="Avg Order Value"
+          title="Avg Plan Value"
           value={`$${avgOrderValue.toFixed(2)}`}
           icon={
             <svg
@@ -414,22 +429,22 @@ export default function AnalyticsPage() {
         </AdminCard>
       </div>
 
-      {/* Enrollment by Course Chart */}
+      {/* Enrollments by Plans Chart */}
       <AdminCard
-        title="Enrollments by Course"
-        subtitle="Student enrollment distribution across courses"
+        title="Enrollments by Plans"
+        subtitle="Subscription count by plan (Monthly / Yearly)"
         action={
-          totalEnrollmentsByCourse > 0 ? (
+          totalSubscriptionsByPlan > 0 ? (
             <Badge variant="primary" size="sm" className="hidden sm:inline-flex">
-              {totalEnrollmentsByCourse.toLocaleString()} total
+              {totalSubscriptionsByPlan.toLocaleString()} total
             </Badge>
           ) : null
         }
       >
         <div className="h-72 sm:h-80 lg:h-96">
-          {enrollmentsByCourse.length > 0 ? (
+          {subscriptionsByPlan.length > 0 ? (
             <EnrollmentChart
-              data={enrollmentsByCourse.map((item) => ({
+              data={subscriptionsByPlan.map((item) => ({
                 name: item.label,
                 enrollments: item.value,
               }))}
@@ -437,7 +452,7 @@ export default function AnalyticsPage() {
             />
           ) : (
             <div className="flex items-center justify-center h-full text-gray-400 text-sm">
-              No enrollment data available
+              No subscription data available
             </div>
           )}
         </div>
@@ -446,9 +461,9 @@ export default function AnalyticsPage() {
       {/* Top Courses & Revenue by Category */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {/* Top Courses */}
-        <AdminCard
+        {/* <AdminCard
           title="Top Performing Courses"
-          subtitle="Ranked by revenue"
+          subtitle="By engagement"
           padding="none"
         >
           {topCourses.length > 0 ? (
@@ -489,9 +504,6 @@ export default function AnalyticsPage() {
                     </div>
                   </div>
                   <div className="text-right shrink-0">
-                    <p className="text-xs sm:text-sm font-bold text-primary">
-                      ${course.revenue.toLocaleString()}
-                    </p>
                     <Badge
                       variant={course.trend >= 0 ? "success" : "danger"}
                       size="sm"
@@ -508,17 +520,17 @@ export default function AnalyticsPage() {
               No course data available
             </div>
           )}
-        </AdminCard>
+        </AdminCard> */}
 
-        {/* Revenue by Category - Pie Chart */}
+        {/* Revenue by Plan - Pie Chart */}
         <AdminCard
-          title="Revenue by Category"
-          subtitle="Distribution across categories"
+          title="Revenue by Plan"
+          subtitle="Subscription revenue by plan (Monthly / Yearly)"
         >
           <div className="h-64 sm:h-72 lg:h-[340px]">
-            {revenueByCategory.length > 0 ? (
+            {revenueByPlan.length > 0 ? (
               <PieChart
-                data={revenueByCategory}
+                data={revenueByPlan}
                 centerValue={
                   totalRevenue >= 1000
                     ? `$${(totalRevenue / 1000).toFixed(0)}k`
@@ -528,7 +540,7 @@ export default function AnalyticsPage() {
               />
             ) : (
               <div className="flex items-center justify-center h-full text-gray-400 text-sm">
-                No category data available
+                No plan revenue data available
               </div>
             )}
           </div>

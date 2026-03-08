@@ -7,7 +7,7 @@ import AdminButton from "@/components/admin/AdminButton";
 import Badge from "@/components/admin/Badge";
 import RevenueChart from "@/components/admin/RevenueChart";
 import LineChart from "@/components/admin/LineChart";
-import { dashboardApi, ChartData, RecentEnrollment, TopCourse, DashboardStats } from "@/lib/api";
+import { dashboardApi, ChartData, RecentEnrollment, TopCourse, DashboardStats, SubscriptionRecord } from "@/lib/api";
 
 // Icons
 const RevenueIcon = () => (
@@ -109,17 +109,33 @@ export default function AdminDashboard() {
   const [userGrowthData, setUserGrowthData] = useState<ChartData[]>([]);
   const [userGrowthTrend, setUserGrowthTrend] = useState(0);
   const [recentEnrollments, setRecentEnrollments] = useState<RecentEnrollment[]>([]);
+  const [recentSubscriptions, setRecentSubscriptions] = useState<SubscriptionRecord[]>([]);
   const [topCourses, setTopCourses] = useState<TopCourse[]>([]);
+
+  const exportRevenueCsv = () => {
+    if (revenueData.length === 0) return;
+    const headers = "Month,Revenue (USD)\n";
+    const rows = revenueData.map((d) => `"${d.label}",${d.value}`).join("\n");
+    const csv = headers + rows;
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `revenue-chart-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   useEffect(() => {
     const fetchDashboardData = async () => {
       setIsLoading(true);
       try {
-        const [statsRes, revenueRes, userGrowthRes, enrollmentsRes, coursesRes] = await Promise.all([
+        const [statsRes, revenueRes, userGrowthRes, enrollmentsRes, subscriptionsRes, coursesRes] = await Promise.all([
           dashboardApi.getStats(period),
           dashboardApi.getRevenueChart(12),
           dashboardApi.getUserGrowth(12),
           dashboardApi.getRecentEnrollments(5),
+          dashboardApi.getRecentSubscriptions(5),
           dashboardApi.getTopCourses(4),
         ]);
 
@@ -135,6 +151,9 @@ export default function AdminDashboard() {
         }
         if (enrollmentsRes.success && enrollmentsRes.data) {
           setRecentEnrollments(enrollmentsRes.data);
+        }
+        if (subscriptionsRes.success && subscriptionsRes.data) {
+          setRecentSubscriptions(subscriptionsRes.data);
         }
         if (coursesRes.success && coursesRes.data) {
           setTopCourses(coursesRes.data);
@@ -252,7 +271,12 @@ export default function AdminDashboard() {
           title="Revenue Overview"
           subtitle="Monthly revenue performance"
           action={
-            <AdminButton variant="ghost" size="sm" className="hidden sm:inline-flex">
+            <AdminButton
+              variant="ghost"
+              size="sm"
+              className="hidden sm:inline-flex"
+              onClick={exportRevenueCsv}
+            >
               <svg
                 width="16"
                 height="16"
@@ -292,12 +316,64 @@ export default function AdminDashboard() {
         </AdminCard>
       </div>
 
+      {/* Plan Enrollments (Subscriptions) */}
+      <AdminCard
+        title="Plan Enrollments"
+        subtitle="Users and their subscription plans"
+        action={
+          <AdminButton variant="ghost" size="sm" href="/admin/subscriptions" className="hidden sm:inline-flex">
+            View All
+          </AdminButton>
+        }
+        padding="none"
+      >
+        <div className="divide-y divide-gray-50">
+          {recentSubscriptions.length > 0 ? (
+            recentSubscriptions.map((sub) => (
+              <div
+                key={sub.id}
+                className="flex items-center gap-3 sm:gap-4 px-4 sm:px-6 py-3 sm:py-4 hover:bg-gray-50/50 transition-colors"
+              >
+                <div className="w-9 h-9 sm:w-11 sm:h-11 bg-gradient-to-br from-primary to-primary/80 rounded-full flex items-center justify-center shrink-0 shadow-sm">
+                  <span className="text-white text-xs sm:text-sm font-semibold">
+                    {getInitials(sub.user.firstName, sub.user.lastName)}
+                  </span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs sm:text-sm font-semibold text-gray-900 truncate">
+                    {sub.user.firstName} {sub.user.lastName}
+                  </p>
+                  <p className="text-[10px] sm:text-xs text-gray-500 truncate mt-0.5">
+                    {sub.user.email}
+                  </p>
+                </div>
+                <div className="text-right shrink-0">
+                  <p className="text-xs sm:text-sm font-medium text-primary">
+                    {sub.planName} · {sub.billingCycle}
+                  </p>
+                  <p className="text-[10px] sm:text-xs text-gray-500 mt-0.5">
+                    ${typeof sub.amount === "number" ? sub.amount.toFixed(2) : sub.amount}
+                  </p>
+                  <p className="text-[10px] sm:text-xs text-gray-400 mt-0.5">
+                    {formatRelativeTime(sub.subscribedAt)}
+                  </p>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="px-4 sm:px-6 py-8 text-center text-gray-500 text-sm">
+              No plan enrollments yet
+            </div>
+          )}
+        </div>
+      </AdminCard>
+
       {/* Recent Activity Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {/* Recent Enrollments */}
-        <AdminCard
+        {/* <AdminCard
           title="Recent Enrollments"
-          subtitle="Latest course purchases"
+          subtitle="Recent course activity"
           action={
             <AdminButton variant="ghost" size="sm" href="/admin/users" className="hidden sm:inline-flex">
               View All
@@ -326,9 +402,13 @@ export default function AdminDashboard() {
                     </p>
                   </div>
                   <div className="text-right flex-shrink-0">
-                    <p className="text-xs sm:text-sm font-bold text-primary">
-                      ${enrollment.course.price}
-                    </p>
+                    {enrollment.planName ? (
+                      <p className="text-xs sm:text-sm font-medium text-primary">
+                        {enrollment.planName}
+                      </p>
+                    ) : (
+                      <p className="text-xs sm:text-sm text-gray-400">—</p>
+                    )}
                     <p className="text-[10px] sm:text-xs text-gray-400 mt-0.5">
                       {formatRelativeTime(enrollment.enrolledAt)}
                     </p>
@@ -341,12 +421,12 @@ export default function AdminDashboard() {
               </div>
             )}
           </div>
-        </AdminCard>
+        </AdminCard> */}
 
         {/* Top Courses */}
-        <AdminCard
+        {/* <AdminCard
           title="Top Performing Courses"
-          subtitle="Ranked by revenue"
+          subtitle="By engagement"
           action={
             <AdminButton variant="ghost" size="sm" href="/admin/courses" className="hidden sm:inline-flex">
               View All
@@ -392,9 +472,6 @@ export default function AdminDashboard() {
                     </div>
                   </div>
                   <div className="text-right flex-shrink-0">
-                    <p className="text-xs sm:text-sm font-bold text-primary">
-                      ${(course.revenue ?? 0).toLocaleString()}
-                    </p>
                     <Badge
                       variant={(course.trend ?? 0) >= 0 ? "success" : "danger"}
                       size="sm"
@@ -411,7 +488,7 @@ export default function AdminDashboard() {
               </div>
             )}
           </div>
-        </AdminCard>
+        </AdminCard> */}
       </div>
 
       {/* Quick Actions */}

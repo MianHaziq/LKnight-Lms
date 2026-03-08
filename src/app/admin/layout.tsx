@@ -111,11 +111,18 @@ const BackIcon = () => (
   </svg>
 );
 
+const SubscriptionsIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+  </svg>
+);
+
 const navItems = [
   { name: "Dashboard", href: "/admin", icon: DashboardIcon },
   { name: "Courses", href: "/admin/courses", icon: CoursesIcon },
   { name: "Live", href: "/admin/live", icon: LiveIcon },
   { name: "Users", href: "/admin/users", icon: UsersIcon },
+  { name: "Subscriptions", href: "/admin/subscriptions", icon: SubscriptionsIcon },
   { name: "Categories", href: "/admin/categories", icon: CategoriesIcon },
   { name: "Team", href: "/admin/team", icon: TeamIcon },
   { name: "Testimonials", href: "/admin/testimonials", icon: TestimonialsIcon },
