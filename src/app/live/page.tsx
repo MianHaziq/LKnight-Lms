@@ -29,7 +29,7 @@ async function fetchPlayback(
 }
 
 function LivePageContent() {
-  const { user, isLoading: authLoading } = useAuth();
+  const { user, isLoading: authLoading, isAdmin } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const streamIdParam = searchParams.get("stream");
@@ -201,15 +201,32 @@ function LivePageContent() {
 
           {!loading && accessDenied && (
             <div className="bg-gray-800 rounded-xl border border-gray-700 p-8 text-center">
-              <p className="text-gray-300 mb-4">
-                Live streaming is available only for paid or trial plan members.
-              </p>
-              <Link
-                href="/pricing"
-                className="inline-block px-6 py-3 bg-secondary text-white font-medium rounded-lg hover:opacity-90"
-              >
-                Upgrade to watch
-              </Link>
+              {isAdmin ? (
+                <>
+                  <p className="text-gray-300 mb-4">
+                    Could not load the live stream. You have admin access — try again or check the stream is active.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => window.location.reload()}
+                    className="inline-block px-6 py-3 bg-secondary text-white font-medium rounded-lg hover:opacity-90"
+                  >
+                    Try again
+                  </button>
+                </>
+              ) : (
+                <>
+                  <p className="text-gray-300 mb-4">
+                    Live streaming is available only for paid members.
+                  </p>
+                  <Link
+                    href="/pricing"
+                    className="inline-block px-6 py-3 bg-secondary text-white font-medium rounded-lg hover:opacity-90"
+                  >
+                    Upgrade to watch
+                  </Link>
+                </>
+              )}
             </div>
           )}
 
