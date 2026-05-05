@@ -16,17 +16,6 @@ const formatDuration = (seconds: number) => {
   return `${mins}:${secs.toString().padStart(2, "0")}`;
 };
 
-// Level badge colors
-const levelColors: Record<string, string> = {
-  BEGINNER: "bg-[#FF6F00]",
-  INTERMEDIATE: "bg-blue-500",
-  ADVANCED: "bg-green-500",
-};
-
-const formatLevel = (level: string) => {
-  return level.charAt(0) + level.slice(1).toLowerCase();
-};
-
 export default function CourseLearningPage() {
   const params = useParams();
   const router = useRouter();
@@ -323,9 +312,6 @@ export default function CourseLearningPage() {
 
               {/* Course Meta */}
               <div className="flex flex-wrap items-center gap-4 pt-4 border-t border-gray-100">
-                <span className={`px-3 py-1 rounded-md text-white text-xs font-semibold ${levelColors[course.level] || "bg-gray-500"}`}>
-                  {formatLevel(course.level)}
-                </span>
                 {course.category && (
                   <span className="text-sm text-gray-600">
                     Category: <span className="font-medium text-[#000E51]">{course.category.name}</span>

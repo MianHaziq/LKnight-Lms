@@ -10,15 +10,6 @@ import Footer from "@/components/Footer";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 
-const levelColors: Record<string, string> = {
-  BEGINNER: "bg-[#FF6F00]",
-  INTERMEDIATE: "bg-blue-500",
-  ADVANCED: "bg-green-500",
-};
-
-const formatLevel = (level: string) =>
-  level.charAt(0) + level.slice(1).toLowerCase();
-
 const formatDuration = (seconds: number) => {
   if (!seconds) return "0 min";
   const hours = Math.floor(seconds / 3600);
@@ -181,20 +172,13 @@ export default function CourseDetailPage() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
             {/* Left: Course Info */}
             <div className="lg:col-span-2">
-              <div className="flex flex-wrap items-center gap-3 mb-4">
-                <span
-                  className={`px-3 py-1 rounded-md text-white text-xs font-semibold ${
-                    levelColors[course.level] || "bg-gray-500"
-                  }`}
-                >
-                  {formatLevel(course.level)}
-                </span>
-                {course.category && (
+              {course.category && (
+                <div className="flex flex-wrap items-center gap-3 mb-4">
                   <span className="text-[#FF6F00] text-sm font-medium">
                     {course.category.name}
                   </span>
-                )}
-              </div>
+                </div>
+              )}
 
               <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-4 font-outfit">
                 {course.title}

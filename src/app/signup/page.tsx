@@ -7,8 +7,10 @@ import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useGoogleLogin } from "@react-oauth/google";
+import { useReturnHref, clearReturnHref } from "@/hooks/useReturnHref";
 
 export default function SignUpPage() {
+  const returnHref = useReturnHref();
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -57,7 +59,8 @@ export default function SignUpPage() {
     setIsLoading(true);
     try {
       await signup(firstName, lastName, formData.email, formData.password);
-      router.push("/");
+      clearReturnHref();
+      router.push(returnHref);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Signup failed. Please try again.");
     } finally {
@@ -70,10 +73,11 @@ export default function SignUpPage() {
     setIsGoogleLoading(true);
     try {
       const user = await googleLogin(accessToken, 'accessToken');
+      clearReturnHref();
       if (user?.role === 'ADMIN') {
         router.push('/admin');
       } else {
-        router.push('/');
+        router.push(returnHref);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Google sign up failed");
@@ -258,6 +262,29 @@ export default function SignUpPage() {
           transition={{ duration: 0.5 }}
           className="w-full max-w-[480px] mx-auto"
         >
+          {/* Back Link */}
+          <Link
+            href={returnHref}
+            aria-label="Go back to previous page"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-500 hover:text-[#000E51] mb-6 transition-colors group"
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="group-hover:-translate-x-0.5 transition-transform"
+            >
+              <line x1="19" y1="12" x2="5" y2="12" />
+              <polyline points="12 19 5 12 12 5" />
+            </svg>
+            Back
+          </Link>
+
           {/* Logo */}
           <Link href="/" className="inline-block mb-8">
             <Image

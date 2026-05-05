@@ -9,12 +9,6 @@ import AdminSelect from "@/components/admin/AdminSelect";
 import { categoryApi, courseApi, uploadApi, Category } from "@/lib/api";
 import { useToast } from "@/components/ui/Toast";
 
-const levelOptions = [
-  { value: "BEGINNER", label: "Beginner" },
-  { value: "INTERMEDIATE", label: "Intermediate" },
-  { value: "ADVANCED", label: "Advanced" },
-];
-
 export default function NewCoursePage() {
   const router = useRouter();
   const { showToast } = useToast();
@@ -30,7 +24,6 @@ export default function NewCoursePage() {
     description: "",
     instructorName: "",
     categoryId: "",
-    level: "BEGINNER",
     price: "",
   });
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
@@ -132,7 +125,6 @@ export default function NewCoursePage() {
         instructorName: formData.instructorName.trim() || undefined,
         categoryId: formData.categoryId,
         instructorId: "", // Will be auto-assigned by backend
-        level: formData.level as "BEGINNER" | "INTERMEDIATE" | "ADVANCED",
         price: formData.price ? parseFloat(formData.price) : 0,
         status,
       };
@@ -264,7 +256,7 @@ export default function NewCoursePage() {
           </AdminCard>
 
           {/* Course Details */}
-          <AdminCard title="Course Details" subtitle="Category, level, and pricing">
+          <AdminCard title="Course Details" subtitle="Category and instructor">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               {loadingCategories ? (
                 <div className="space-y-1.5">
@@ -285,17 +277,6 @@ export default function NewCoursePage() {
                   required
                 />
               )}
-
-              <AdminSelect
-                label="Level"
-                name="level"
-                options={levelOptions}
-                value={formData.level}
-                onChange={handleChange}
-                required
-              />
-
-              {/* Price field removed — pricing is now managed via subscription plans */}
 
               <AdminInput
                 label="Teacher Name"

@@ -12,13 +12,6 @@ import ConfirmModal from "@/components/admin/ConfirmModal";
 import { courseApi, categoryApi, Course, Category } from "@/lib/api";
 import { useToast } from "@/components/ui/Toast";
 
-const levelOptions = [
-  { value: "", label: "All Levels" },
-  { value: "BEGINNER", label: "Beginner" },
-  { value: "INTERMEDIATE", label: "Intermediate" },
-  { value: "ADVANCED", label: "Advanced" },
-];
-
 const statusOptions = [
   { value: "", label: "All Status" },
   { value: "PUBLISHED", label: "Published" },
@@ -51,7 +44,6 @@ export default function CoursesPage() {
   // Filters
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
-  const [levelFilter, setLevelFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
 
   // Pagination
@@ -77,7 +69,6 @@ export default function CoursesPage() {
         limit?: number;
         search?: string;
         category?: string;
-        level?: string;
         status?: string;
       } = {
         page: currentPage,
@@ -86,7 +77,6 @@ export default function CoursesPage() {
 
       if (searchQuery) params.search = searchQuery;
       if (categoryFilter) params.category = categoryFilter;
-      if (levelFilter) params.level = levelFilter;
       if (statusFilter) params.status = statusFilter;
 
       const response = await courseApi.getAll(params);
@@ -103,7 +93,7 @@ export default function CoursesPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [currentPage, searchQuery, categoryFilter, levelFilter, statusFilter]);
+  }, [currentPage, searchQuery, categoryFilter, statusFilter]);
 
   // Fetch categories for filter dropdown
   const fetchCategories = async () => {
@@ -174,12 +164,7 @@ export default function CoursesPage() {
   // Reset to first page when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, categoryFilter, levelFilter, statusFilter]);
-
-  // Format level for display
-  const formatLevel = (level: string) => {
-    return level.charAt(0) + level.slice(1).toLowerCase();
-  };
+  }, [searchQuery, categoryFilter, statusFilter]);
 
   // Format status for display
   const formatStatus = (status: string) => {
@@ -216,25 +201,6 @@ export default function CoursesPage() {
             </p>
           </div>
         </div>
-      ),
-    },
-    {
-      key: "level",
-      header: "Level",
-      sortable: true,
-      render: (course: Course) => (
-        <Badge
-          variant={
-            course.level === "BEGINNER"
-              ? "success"
-              : course.level === "INTERMEDIATE"
-              ? "warning"
-              : "danger"
-          }
-          size="sm"
-        >
-          {formatLevel(course.level)}
-        </Badge>
       ),
     },
     /* Price column removed — pricing is now managed via subscription plans */
@@ -450,7 +416,7 @@ export default function CoursesPage() {
 
       {/* Filters */}
       <AdminCard padding="md">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <div className="sm:col-span-2 lg:col-span-2">
             <AdminInput
               placeholder="Search courses..."
@@ -481,12 +447,6 @@ export default function CoursesPage() {
             placeholder="Category"
           />
           <AdminSelect
-            options={levelOptions}
-            value={levelFilter}
-            onChange={(e) => setLevelFilter(e.target.value)}
-            placeholder="Level"
-          />
-          <AdminSelect
             options={statusOptions}
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
@@ -507,7 +467,7 @@ export default function CoursesPage() {
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 px-4 sm:px-6 py-3 sm:py-4 border-t border-gray-100">
           <p className="text-xs sm:text-sm text-gray-500">
             Showing {courses.length} of {totalCourses} courses
-            {(searchQuery || categoryFilter || levelFilter || statusFilter) && " (filtered)"}
+            {(searchQuery || categoryFilter || statusFilter) && " (filtered)"}
           </p>
           <div className="flex items-center gap-1.5 sm:gap-2">
             <AdminButton

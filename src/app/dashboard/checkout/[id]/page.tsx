@@ -6,17 +6,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { enrollmentApi, CheckoutCourse } from "@/lib/api";
 
-// Level badge colors
-const levelColors: Record<string, string> = {
-  BEGINNER: "bg-[#FF6F00]",
-  INTERMEDIATE: "bg-blue-500",
-  ADVANCED: "bg-green-500",
-};
-
-const formatLevel = (level: string) => {
-  return level.charAt(0) + level.slice(1).toLowerCase();
-};
-
 function CheckoutContent() {
   const params = useParams();
   const router = useRouter();
@@ -162,7 +151,7 @@ function CheckoutContent() {
           {/* Course Header Card */}
           <div className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
             {/* Course Image */}
-            <div className="relative aspect-[21/9] overflow-hidden">
+            <div className="relative aspect-video overflow-hidden">
               {course.thumbnail ? (
                 <Image
                   src={course.thumbnail}
@@ -177,10 +166,6 @@ function CheckoutContent() {
                   </svg>
                 </div>
               )}
-              {/* Level Badge */}
-              <span className={`absolute top-4 left-4 px-4 py-2 rounded-lg text-white text-sm font-semibold ${levelColors[course.level] || "bg-gray-500"}`}>
-                {formatLevel(course.level)}
-              </span>
             </div>
 
             {/* Course Info */}

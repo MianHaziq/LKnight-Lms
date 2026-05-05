@@ -12,12 +12,6 @@ import { categoryApi, courseApi, documentApi, uploadApi, Category, CourseDetails
 import { DocumentManager } from "@/components/admin";
 import { useToast } from "@/components/ui/Toast";
 
-const levelOptions = [
-  { value: "BEGINNER", label: "Beginner" },
-  { value: "INTERMEDIATE", label: "Intermediate" },
-  { value: "ADVANCED", label: "Advanced" },
-];
-
 export default function EditCoursePage() {
   const params = useParams();
   const router = useRouter();
@@ -40,7 +34,6 @@ export default function EditCoursePage() {
     description: "",
     instructorName: "",
     categoryId: "",
-    level: "BEGINNER",
     price: "",
     status: "DRAFT",
   });
@@ -72,7 +65,6 @@ export default function EditCoursePage() {
           description: courseData.description || "",
           instructorName: courseData.instructorName || "",
           categoryId: courseData.category?.id || courseData.categoryId || "",
-          level: (courseData.level?.toUpperCase() as "BEGINNER" | "INTERMEDIATE" | "ADVANCED") || "BEGINNER",
           price: courseData.price?.toString() || "0",
           status: (courseData.status?.toUpperCase() as "DRAFT" | "PUBLISHED") || "DRAFT",
         });
@@ -161,7 +153,6 @@ export default function EditCoursePage() {
         thumbnail: thumbnailPreview || undefined,
         instructorName: formData.instructorName.trim() || undefined,
         categoryId: formData.categoryId,
-        level: formData.level as "BEGINNER" | "INTERMEDIATE" | "ADVANCED",
         price: formData.price ? parseFloat(formData.price) : 0,
         status: formData.status as "DRAFT" | "PUBLISHED",
       };
@@ -396,7 +387,7 @@ export default function EditCoursePage() {
           </AdminCard>
 
           {/* Course Details */}
-          <AdminCard title="Course Details" subtitle="Category, level, and pricing">
+          <AdminCard title="Course Details" subtitle="Category and instructor">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <AdminSelect
                 label="Category"
@@ -406,17 +397,6 @@ export default function EditCoursePage() {
                 onChange={handleChange}
                 required
               />
-
-              <AdminSelect
-                label="Level"
-                name="level"
-                options={levelOptions}
-                value={formData.level}
-                onChange={handleChange}
-                required
-              />
-
-              {/* Price field removed — pricing is now managed via subscription plans */}
 
               <AdminInput
                 label="Teacher Name"

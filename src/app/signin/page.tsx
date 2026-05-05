@@ -7,8 +7,10 @@ import { motion } from "framer-motion";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useGoogleLogin } from "@react-oauth/google";
+import { useReturnHref, clearReturnHref } from "@/hooks/useReturnHref";
 
 function SignInContent() {
+  const returnHref = useReturnHref();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -30,6 +32,7 @@ function SignInContent() {
       // Debug: log user to verify role is returned
       console.log('Login response user:', user);
 
+      clearReturnHref();
       // Redirect to the intended page or default based on role
       const redirectTo = searchParams.get('redirect');
       if (redirectTo) {
@@ -51,6 +54,7 @@ function SignInContent() {
     setIsGoogleLoading(true);
     try {
       const user = await googleLogin(accessToken, 'accessToken');
+      clearReturnHref();
       const redirectTo = searchParams.get('redirect');
       if (redirectTo) {
         router.push(redirectTo);
@@ -81,6 +85,29 @@ function SignInContent() {
           transition={{ duration: 0.5 }}
           className="w-full max-w-[480px] mx-auto"
         >
+          {/* Back Link */}
+          <Link
+            href={returnHref}
+            aria-label="Go back to previous page"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-500 hover:text-[#000E51] mb-6 transition-colors group"
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="group-hover:-translate-x-0.5 transition-transform"
+            >
+              <line x1="19" y1="12" x2="5" y2="12" />
+              <polyline points="12 19 5 12 12 5" />
+            </svg>
+            Back
+          </Link>
+
           {/* Logo */}
           <Link href="/" className="inline-block mb-8">
             <Image

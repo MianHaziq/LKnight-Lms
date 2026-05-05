@@ -10,7 +10,6 @@ const transformCourse = (course: Course): CourseCardProps => ({
   id: course.id,
   slug: course.slug,
   thumbnail: course.thumbnail,
-  level: course.level || "Beginner",
   category: course.category?.name || "General",
   title: course.title,
   summary: course.summary,
@@ -80,7 +79,7 @@ export default function FeaturedCoursesSection({
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 lg:gap-8">
             {Array.from({ length: limit }).map((_, i) => (
               <div key={i} className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 animate-pulse">
-                <div className="aspect-[16/10] bg-gray-200" />
+                <div className="aspect-video bg-gray-200" />
                 <div className="p-4 sm:p-5 lg:p-6">
                   <div className="h-3 w-20 bg-gray-200 rounded mb-3" />
                   <div className="h-5 w-3/4 bg-gray-200 rounded mb-2" />

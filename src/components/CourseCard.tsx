@@ -6,7 +6,6 @@ export interface CourseCardProps {
   slug: string;
   image?: string;
   thumbnail?: string;
-  level: string;
   category: string;
   categoryColor?: string;
   title: string;
@@ -24,19 +23,11 @@ export interface CourseCardProps {
   href?: string;
 }
 
-// Level badge colors
-const levelColors: Record<string, string> = {
-  Beginner: "bg-secondary",
-  Intermediate: "bg-blue-500",
-  Advanced: "bg-green-500",
-};
-
 export default function CourseCard({
   id,
   slug,
   image,
   thumbnail,
-  level,
   category,
   categoryColor = "text-secondary",
   title,
@@ -68,19 +59,13 @@ export default function CourseCard({
       className="block bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 group border border-gray-100"
     >
       {/* Image Container */}
-      <div className="block relative aspect-[16/10] overflow-hidden bg-gray-100">
+      <div className="block relative aspect-video overflow-hidden bg-gray-100">
         <Image
           src={displayImage}
           alt={title}
           fill
           className="object-cover group-hover:scale-105 transition-transform duration-500"
         />
-        {/* Level Badge */}
-        <span
-          className={`absolute top-4 left-4 px-3 py-1.5 rounded-md text-white text-xs sm:text-sm font-semibold ${levelColors[level] || "bg-secondary"}`}
-        >
-          {level}
-        </span>
       </div>
 
       {/* Content */}

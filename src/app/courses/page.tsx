@@ -12,7 +12,6 @@ const transformCourse = (course: Course): CourseCardProps => ({
   id: course.id,
   slug: course.slug,
   thumbnail: course.thumbnail,
-  level: course.level || "Beginner",
   category: course.category?.name || "General",
   title: course.title,
   summary: course.summary,
@@ -125,13 +124,14 @@ function CoursesContent() {
       <div className="bg-[#000E51] pt-16 pb-20 px-4 relative">
         <div className="max-w-3xl mx-auto text-center">
           <h1 className="text-3xl md:text-4xl lg:text-[44px] font-bold text-white mb-4 leading-tight">
-            Executive Course{" "}
-            <span className="text-[#FF6F00]">Catalog</span>
+            Two Lenses. One Goal.{" "}
+            <span className="text-[#FF6F00]">Better Leadership.</span>
           </h1>
 
           <p className="text-gray-400 text-sm md:text-base max-w-xl mx-auto mb-8 leading-relaxed">
-            Designed for leaders seeking to strengthen strategic thinking, decision-making, and
-            organizational impact through practical, executive-level learning.
+            This is where organizational strategy and human behavior meet. Every course is designed
+            through both lenses, giving you clarity to lead your business and the awareness to lead
+            your people. The result is leadership that is steady, intentional, and built to last.
           </p>
 
           {/* Search Bar */}
@@ -216,7 +216,7 @@ function CoursesContent() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 lg:gap-8">
               {Array.from({ length: LIMIT }).map((_, i) => (
                 <div key={i} className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 animate-pulse">
-                  <div className="aspect-[16/10] bg-gray-200" />
+                  <div className="aspect-video bg-gray-200" />
                   <div className="p-4 sm:p-5 lg:p-6">
                     <div className="h-3 w-20 bg-gray-200 rounded mb-3" />
                     <div className="h-5 w-3/4 bg-gray-200 rounded mb-2" />

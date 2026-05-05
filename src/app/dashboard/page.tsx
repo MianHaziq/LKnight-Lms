@@ -6,17 +6,6 @@ import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { enrollmentApi, subscriptionApi, SubscriptionInfo, CourseWithStatus, UserDashboardStats } from "@/lib/api";
 
-// Level badge colors
-const levelColors: Record<string, string> = {
-  BEGINNER: "bg-[#FF6F00]",
-  INTERMEDIATE: "bg-blue-500",
-  ADVANCED: "bg-green-500",
-};
-
-const formatLevel = (level: string) => {
-  return level.charAt(0) + level.slice(1).toLowerCase();
-};
-
 export default function DashboardPage() {
   const { user } = useAuth();
   const [courses, setCourses] = useState<CourseWithStatus[]>([]);
@@ -315,7 +304,7 @@ function CourseCard({ course }: { course: CourseWithStatus }) {
       {/* Image Container */}
       <Link
         href={isLocked ? `/courses/${course.id}` : `/dashboard/courses/${course.id}`}
-        className="block relative aspect-[16/10] overflow-hidden"
+        className="block relative aspect-video overflow-hidden"
       >
         {course.thumbnail ? (
           <Image
@@ -345,11 +334,6 @@ function CourseCard({ course }: { course: CourseWithStatus }) {
             </div>
           </div>
         )}
-
-        {/* Level Badge */}
-        <span className={`absolute top-4 left-4 px-3 py-1.5 rounded-md text-white text-xs sm:text-sm font-semibold ${levelColors[course.level] || "bg-gray-500"}`}>
-          {formatLevel(course.level)}
-        </span>
 
         {/* Progress Badge (only for unlocked) */}
         {!isLocked && course.progress > 0 && (
