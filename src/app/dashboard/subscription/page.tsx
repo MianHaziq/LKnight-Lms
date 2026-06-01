@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
-import { subscriptionApi, SubscriptionInfo, User } from "@/lib/api";
+import { subscriptionApi, SubscriptionInfo, User, InviteLink } from "@/lib/api";
 
 interface TeamMember {
   id: string;
@@ -35,6 +35,14 @@ export default function SubscriptionManagementPage() {
 
   // Remove member state
   const [removingMemberId, setRemovingMemberId] = useState<string | null>(null);
+
+  // Invite link state
+  const [inviteLink, setInviteLink] = useState<InviteLink | null>(null);
+  const [inviteLinkLoading, setInviteLinkLoading] = useState(false);
+  const [inviteLinkError, setInviteLinkError] = useState<string | null>(null);
+  const [inviteLinkCopied, setInviteLinkCopied] = useState(false);
+  const [confirmRevoke, setConfirmRevoke] = useState(false);
+  const [linkExpiresIn, setLinkExpiresIn] = useState<'1d' | '7d' | '30d' | 'never'>('7d');
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -72,6 +80,68 @@ export default function SubscriptionManagementPage() {
       }
     } catch {
       // Non-critical — team members just won't show
+    }
+  };
+
+  const fetchInviteLink = async (subscriptionId: string) => {
+    try {
+      const response = await subscriptionApi.getInviteLink(subscriptionId);
+      if (response.success) {
+        setInviteLink(response.data || null);
+      }
+    } catch {
+      // Non-critical
+    }
+  };
+
+  useEffect(() => {
+    if (subscription && subscription.maxUsers > 1 && !subscription.isTeamMember) {
+      fetchInviteLink(subscription.id);
+    }
+  }, [subscription?.id]);
+
+  const handleGenerateLink = async () => {
+    if (!subscription) return;
+    try {
+      setInviteLinkLoading(true);
+      setInviteLinkError(null);
+      const response = await subscriptionApi.createInviteLink(subscription.id, {
+        expiresIn: linkExpiresIn,
+      });
+      if (response.success && response.data) {
+        setInviteLink(response.data);
+      }
+    } catch (err) {
+      setInviteLinkError(err instanceof Error ? err.message : "Failed to generate link.");
+    } finally {
+      setInviteLinkLoading(false);
+    }
+  };
+
+  const handleRevokeLink = async () => {
+    if (!subscription) return;
+    try {
+      setInviteLinkLoading(true);
+      setInviteLinkError(null);
+      await subscriptionApi.revokeInviteLink(subscription.id);
+      setInviteLink(null);
+      setConfirmRevoke(false);
+    } catch (err) {
+      setInviteLinkError(err instanceof Error ? err.message : "Failed to revoke link.");
+    } finally {
+      setInviteLinkLoading(false);
+    }
+  };
+
+  const handleCopyLink = async () => {
+    if (!inviteLink) return;
+    try {
+      await navigator.clipboard.writeText(inviteLink.url);
+      setInviteLinkCopied(true);
+      setTimeout(() => setInviteLinkCopied(false), 2000);
+    } catch {
+      // Fallback: select-and-copy is up to the user
+      setInviteLinkError("Could not copy automatically. Please copy the link manually.");
     }
   };
 
@@ -350,6 +420,140 @@ export default function SubscriptionManagementPage() {
                 {isCancelling ? "Cancelling..." : "Yes, Cancel"}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Shareable Invite Link Section */}
+      {isTeamPlan && isOwner && (
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden mb-6">
+          <div className="p-6 sm:p-8">
+            <div className="flex items-start justify-between gap-4 mb-4">
+              <div>
+                <h2 className="text-lg font-bold text-[#000E51]">Invite link</h2>
+                <p className="text-sm text-gray-500 mt-0.5">
+                  Anyone with this link can join your team — share it via Slack, WhatsApp, or anywhere you like.
+                </p>
+              </div>
+            </div>
+
+            {inviteLinkError && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
+                {inviteLinkError}
+                <button
+                  type="button"
+                  onClick={() => setInviteLinkError(null)}
+                  className="ml-2 font-semibold hover:underline"
+                >
+                  Dismiss
+                </button>
+              </div>
+            )}
+
+            {inviteLink ? (
+              <div className="space-y-4">
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    readOnly
+                    value={inviteLink.url}
+                    onFocus={(e) => e.currentTarget.select()}
+                    className="flex-1 px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-700 font-mono focus:outline-none focus:ring-2 focus:ring-[#FF6F00] focus:border-transparent"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleCopyLink}
+                    className="px-4 py-2.5 bg-[#000E51] hover:bg-[#001570] text-white font-semibold rounded-xl text-sm transition-colors min-w-[88px]"
+                  >
+                    {inviteLinkCopied ? "Copied!" : "Copy"}
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                  <div className="px-3 py-2 bg-gray-50 rounded-lg">
+                    <span className="text-gray-400">Expires:</span>{" "}
+                    <span className="font-semibold text-[#000E51]">
+                      {inviteLink.expiresAt ? formatDate(inviteLink.expiresAt) : "Never"}
+                    </span>
+                  </div>
+                  <div className="px-3 py-2 bg-gray-50 rounded-lg">
+                    <span className="text-gray-400">Used:</span>{" "}
+                    <span className="font-semibold text-[#000E51]">
+                      {inviteLink.usedCount}
+                      {inviteLink.maxUses ? ` / ${inviteLink.maxUses}` : " (unlimited)"}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap gap-2 pt-2">
+                  <button
+                    type="button"
+                    onClick={handleGenerateLink}
+                    disabled={inviteLinkLoading}
+                    className="px-4 py-2 border border-gray-200 text-[#000E51] hover:bg-gray-50 font-semibold rounded-xl text-sm transition-colors disabled:opacity-50"
+                  >
+                    {inviteLinkLoading ? "Working..." : "Regenerate"}
+                  </button>
+                  {confirmRevoke ? (
+                    <>
+                      <button
+                        type="button"
+                        onClick={handleRevokeLink}
+                        disabled={inviteLinkLoading}
+                        className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl text-sm transition-colors disabled:opacity-50"
+                      >
+                        {inviteLinkLoading ? "Revoking..." : "Confirm revoke"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setConfirmRevoke(false)}
+                        className="px-4 py-2 border border-gray-200 text-gray-500 hover:bg-gray-50 font-semibold rounded-xl text-sm transition-colors"
+                      >
+                        Cancel
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setConfirmRevoke(true)}
+                      className="px-4 py-2 border border-red-200 text-red-600 hover:bg-red-50 font-semibold rounded-xl text-sm transition-colors"
+                    >
+                      Revoke
+                    </button>
+                  )}
+                </div>
+                <p className="text-xs text-gray-400">
+                  Regenerating creates a brand-new link and immediately stops the old one from working.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="flex items-center gap-3 flex-wrap">
+                  <label className="text-sm text-gray-600">Link expires:</label>
+                  <select
+                    value={linkExpiresIn}
+                    onChange={(e) => setLinkExpiresIn(e.target.value as '1d' | '7d' | '30d' | 'never')}
+                    className="px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#FF6F00] focus:border-transparent"
+                  >
+                    <option value="1d">In 1 day</option>
+                    <option value="7d">In 7 days</option>
+                    <option value="30d">In 30 days</option>
+                    <option value="never">Never</option>
+                  </select>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleGenerateLink}
+                  disabled={inviteLinkLoading}
+                  className="px-5 py-2.5 bg-[#FF6F00] hover:bg-[#E86400] text-white font-semibold rounded-xl text-sm transition-colors disabled:opacity-50"
+                >
+                  {inviteLinkLoading ? "Generating..." : "Generate invite link"}
+                </button>
+                <p className="text-xs text-gray-400">
+                  Acceptance still counts against your <span className="font-semibold">{subscription.maxUsers}-seat</span> limit.
+                </p>
+              </div>
+            )}
           </div>
         </div>
       )}

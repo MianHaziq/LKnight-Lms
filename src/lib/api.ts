@@ -1350,7 +1350,61 @@ export const subscriptionApi = {
 
   removeTeamMember: (subscriptionId: string, memberId: string) =>
     api.delete<void>(`/subscriptions/${subscriptionId}/members/${memberId}`),
+
+  // Shareable invite link
+  getInviteLink: (subscriptionId: string) =>
+    api.get<InviteLink | null>(`/subscriptions/${subscriptionId}/invite-link`),
+
+  createInviteLink: (
+    subscriptionId: string,
+    options?: { expiresIn?: '1d' | '7d' | '30d' | 'never'; maxUses?: number | null }
+  ) =>
+    api.post<InviteLink>(`/subscriptions/${subscriptionId}/invite-link`, options || {}),
+
+  revokeInviteLink: (subscriptionId: string) =>
+    api.delete<void>(`/subscriptions/${subscriptionId}/invite-link`),
+
+  previewInviteLink: (token: string) =>
+    api.get<InviteLinkPreview>(`/subscriptions/invite-link/preview/${token}`) as Promise<InviteLinkResponse<InviteLinkPreview>>,
+
+  redeemInviteLink: (token: string) =>
+    api.post<{ subscriptionId?: string }>(`/subscriptions/invite-link/redeem`, { token }) as Promise<InviteLinkResponse<{ subscriptionId?: string }>>,
 };
+
+export type InviteLinkStatus =
+  | 'valid'
+  | 'invalid'
+  | 'revoked'
+  | 'expired'
+  | 'exhausted'
+  | 'subscription_inactive'
+  | 'full'
+  | 'is_owner'
+  | 'already_member'
+  | 'joined';
+
+export interface InviteLinkResponse<T> extends ApiResponse<T> {
+  status?: InviteLinkStatus;
+}
+
+export interface InviteLink {
+  id: string;
+  token: string;
+  url: string;
+  isActive: boolean;
+  maxUses: number | null;
+  usedCount: number;
+  expiresAt: string | null;
+  createdAt: string;
+}
+
+export interface InviteLinkPreview {
+  organizationName: string | null;
+  planName: string | null;
+  inviterFirstName: string | null;
+  seatsRemaining: number;
+  expiresAt: string | null;
+}
 
 // Live stream types
 export interface LiveStreamInfo {

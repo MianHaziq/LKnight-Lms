@@ -1,16 +1,27 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useGoogleLogin } from "@react-oauth/google";
 import { useReturnHref, clearReturnHref } from "@/hooks/useReturnHref";
 
-export default function SignUpPage() {
-  const returnHref = useReturnHref();
+// Restrict to same-origin internal paths to prevent open-redirect.
+function safeRedirectPath(value: string | null): string | null {
+  if (!value) return null;
+  if (!value.startsWith("/") || value.startsWith("//")) return null;
+  return value;
+}
+
+function SignUpContent() {
+  const searchParams = useSearchParams();
+  const redirectParam = safeRedirectPath(searchParams.get("redirect"));
+  const referrerHref = useReturnHref();
+  // Explicit ?redirect=... wins over referrer-derived fallback.
+  const returnHref = redirectParam || referrerHref;
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -607,7 +618,7 @@ export default function SignUpPage() {
           >
             Already have an account?{" "}
             <Link
-              href="/signin"
+              href={redirectParam ? `/signin?redirect=${encodeURIComponent(redirectParam)}` : "/signin"}
               className="font-semibold text-[#000E51] hover:text-[#FF6F00] transition-colors"
             >
               Sign in
@@ -616,5 +627,17 @@ export default function SignUpPage() {
         </motion.div>
       </div>
     </div>
+  );
+}
+
+export default function SignUpPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#FF6F00]"></div>
+      </div>
+    }>
+      <SignUpContent />
+    </Suspense>
   );
 }
