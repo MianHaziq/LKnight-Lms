@@ -236,12 +236,13 @@ export default function TestimonialSection({ page }: TestimonialSectionProps) {
         {/* Header with arrows */}
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h2 className="text-[#000E51] text-xl sm:text-2xl lg:text-[28px] font-bold">
+            {/* Heading removed per client request (What Our Students Say) */}
+            {/* <h2 className="text-[#000E51] text-xl sm:text-2xl lg:text-[28px] font-bold">
               What Our Students Say
             </h2>
             <p className="text-[#64748B] text-sm mt-1">
               Hear from our community of learners
-            </p>
+            </p> */}
           </div>
 
           {!isLoading && testimonials.length > 0 && (

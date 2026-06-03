@@ -363,11 +363,11 @@ export default function AboutPage() {
       {/* Right Side - Content */}
       <div className="max-w-[760px]">
         
-        {/* Badge */}
-        <div className="inline-flex items-center gap-2 bg-[#E8EAF6] text-[#000E51] text-[11px] font-semibold px-4 py-2 rounded-full mb-5">
+        {/* Badge — removed per client request (Founders & Leadership) */}
+        {/* <div className="inline-flex items-center gap-2 bg-[#E8EAF6] text-[#000E51] text-[11px] font-semibold px-4 py-2 rounded-full mb-5">
           <span className="w-2 h-2 rounded-full bg-[#000E51]" />
-          Founders 
-        </div>
+          Founders
+        </div> */}
 
         {/* Heading */}
         <h2 className="text-[#000E51] text-2xl sm:text-5xl lg:text-[36px] leading-[1.05] tracking-[-2px] font-bold mb-6">

@@ -1010,7 +1010,7 @@ export default function ModulesPage() {
               </div>
 
               {/* Lesson Count */}
-              <div className="text-sm text-gray-500">{module.lessons.length} lessons</div>
+              <div className="text-sm text-gray-500">{module.lessons.length} {module.lessons.length === 1 ? "lesson" : "lessons"}</div>
 
               {/* Actions */}
               <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>

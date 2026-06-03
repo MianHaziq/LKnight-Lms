@@ -161,7 +161,7 @@ export default function Navbar() {
         </svg>
       ),
       title: "Content Library",
-      description: "Access thousands of curated courses, videos, and learning resources.",
+      description: "Access curated courses, videos, and learning resources.",
       href: dashboardOrSignin,
     },
     {

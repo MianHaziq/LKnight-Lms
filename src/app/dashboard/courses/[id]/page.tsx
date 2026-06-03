@@ -409,7 +409,7 @@ export default function CourseLearningPage() {
                           {module.title}
                         </h4>
                         <p className="text-xs text-gray-500">
-                          {module.lessons?.length || 0} lessons
+                          {module.lessons?.length || 0} {(module.lessons?.length || 0) === 1 ? "lesson" : "lessons"}
                         </p>
                       </div>
                     </div>
@@ -854,6 +854,7 @@ function LegacyVideoPlayer({ lesson, onHalfWatched }: { lesson: Lesson | null; o
         <div className="mb-3">
           <input
             type="range"
+            aria-label="Seek video"
             min={0}
             max={duration || 100}
             value={currentTime}
@@ -869,7 +870,7 @@ function LegacyVideoPlayer({ lesson, onHalfWatched }: { lesson: Lesson | null; o
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 sm:gap-4">
             {/* Play/Pause */}
-            <button onClick={togglePlay} className="text-white hover:text-[#FF6F00] transition-colors p-1">
+            <button onClick={togglePlay} aria-label={isPlaying ? "Pause" : "Play"} className="text-white hover:text-[#FF6F00] transition-colors p-1">
               {isPlaying ? (
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
                   <rect x="6" y="4" width="4" height="16" rx="1"/>
@@ -966,7 +967,7 @@ function LegacyVideoPlayer({ lesson, onHalfWatched }: { lesson: Lesson | null; o
             </div>
 
             {/* Fullscreen */}
-            <button onClick={toggleFullscreen} className="text-white hover:text-[#FF6F00] transition-colors p-1">
+            <button onClick={toggleFullscreen} aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"} className="text-white hover:text-[#FF6F00] transition-colors p-1">
               {isFullscreen ? (
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/>
