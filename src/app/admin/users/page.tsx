@@ -9,9 +9,10 @@ import Badge from "@/components/admin/Badge";
 import DataTable from "@/components/admin/DataTable";
 import { userApi, UserDetails } from "@/lib/api";
 
+// Admin accounts are never listed in the user-management table,
+// so "Admin" is intentionally omitted from the role filter.
 const roleOptions = [
   { value: "", label: "All Roles" },
-  { value: "ADMIN", label: "Admin" },
   { value: "INSTRUCTOR", label: "Instructor" },
   { value: "STUDENT", label: "Student" },
 ];
