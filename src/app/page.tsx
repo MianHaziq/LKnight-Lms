@@ -13,7 +13,7 @@ import { createMetadata } from "@/lib/seo";
 export const metadata: Metadata = createMetadata({
   title: "LKnight Learning Hub - Master New Skills with Expert-Led Courses",
   description:
-    "Transform your career with 500+ expert-led courses in leadership, technology, and business. LKnight Learning Hub by LKnight Productions - Join 50,000+ learners worldwide from Spring, Texas. Start your journey today.",
+    "Transform your leadership with expert-led courses in communication, influence, and team development. LKnight Learning Hub by LKnight Productions, based in Spring, Texas. Start your journey today.",
   keywords: [
     "online learning platform",
     "professional courses",

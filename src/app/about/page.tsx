@@ -10,7 +10,7 @@ import { createMetadata } from "@/lib/seo";
 export const metadata: Metadata = createMetadata({
   title: "About Us - Our Mission & Story",
   description:
-    "Learn about LKnight Learning Hub's mission to democratize education. Founded in 2020, we serve 50,000+ learners across 150+ countries with 500+ expert-led courses.",
+    "Learn about LKnight Learning Hub's mission to strengthen leaders, teams, and organizations through practical, expert-led leadership development.",
   keywords: ["about lknight", "our story", "education mission", "learning community"],
   canonical: "/about",
 });

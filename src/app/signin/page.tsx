@@ -406,30 +406,52 @@ function SignInContent() {
             transition={{ duration: 0.5, delay: 0.5 }}
             className="text-white/70 text-lg max-w-md mb-10"
           >
-            Access thousands of courses, connect with expert instructors, and unlock your full potential.
+            Leadership is more than strategy. It&apos;s how we show up,
+            communicate, influence, and navigate pressure. The LKnight Learning
+            Hub™ provides practical learning experiences designed to strengthen
+            leaders, teams, and organizations.
           </motion.p>
 
-          {/* Stats */}
+          {/* Features */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.6 }}
-            className="flex items-center gap-8 xl:gap-12"
+            className="space-y-5 text-left max-w-md"
           >
-            <div className="text-center">
-              <div className="text-3xl xl:text-4xl font-bold text-[#FF6F00]">10K+</div>
-              <div className="text-white/60 text-sm mt-1">Active Learners</div>
-            </div>
-            <div className="w-px h-12 bg-white/20" />
-            <div className="text-center">
-              <div className="text-3xl xl:text-4xl font-bold text-[#FF6F00]">500+</div>
-              <div className="text-white/60 text-sm mt-1">Expert Courses</div>
-            </div>
-            <div className="w-px h-12 bg-white/20" />
-            <div className="text-center">
-              <div className="text-3xl xl:text-4xl font-bold text-[#FF6F00]">98%</div>
-              <div className="text-white/60 text-sm mt-1">Satisfaction</div>
-            </div>
+            {[
+              {
+                title: "Expert-Led Courses",
+                description: "Built by practitioners with decades of experience",
+              },
+              {
+                title: "Actionable Resources",
+                description: "Companion guides and practical tools",
+              },
+              {
+                title: "The Vault™",
+                description:
+                  "A unique space for shared leadership insights and experiences",
+              },
+            ].map((feature, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.3, delay: 0.7 + index * 0.1 }}
+                className="flex items-start gap-3"
+              >
+                <div className="w-6 h-6 bg-[#FF6F00] rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-white font-semibold">{feature.title}</h3>
+                  <p className="text-white/60 text-sm mt-0.5">{feature.description}</p>
+                </div>
+              </motion.div>
+            ))}
           </motion.div>
 
           {/* Floating Elements */}

@@ -186,7 +186,7 @@ function SignUpContent() {
             transition={{ duration: 0.5, delay: 0.4 }}
             className="text-3xl xl:text-4xl font-bold text-white mb-4"
           >
-            Join Our Community
+            Start Your Learning Journey
           </motion.h2>
 
           {/* Description */}
@@ -196,7 +196,10 @@ function SignUpContent() {
             transition={{ duration: 0.5, delay: 0.5 }}
             className="text-white/70 text-lg max-w-md mb-10"
           >
-            Create an account and start your journey to mastering new skills with expert-led courses.
+            Leadership is more than strategy. It&apos;s how we show up,
+            communicate, influence, and navigate pressure. The LKnight Learning
+            Hub™ provides practical learning experiences designed to strengthen
+            leaders, teams, and organizations.
           </motion.p>
 
           {/* Features */}
@@ -204,27 +207,39 @@ function SignUpContent() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.6 }}
-            className="space-y-4 text-left max-w-sm"
+            className="space-y-5 text-left max-w-md"
           >
             {[
-              { icon: "check", text: "Access to 500+ premium courses" },
-              { icon: "check", text: "Learn from industry experts" },
-              { icon: "check", text: "Certificate upon completion" },
-              { icon: "check", text: "24/7 community support" },
+              {
+                title: "Expert-Led Courses",
+                description: "Built by practitioners with decades of experience",
+              },
+              {
+                title: "Actionable Resources",
+                description: "Companion guides and practical tools",
+              },
+              {
+                title: "The Vault™",
+                description:
+                  "A unique space for shared leadership insights and experiences",
+              },
             ].map((feature, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.3, delay: 0.7 + index * 0.1 }}
-                className="flex items-center gap-3"
+                className="flex items-start gap-3"
               >
-                <div className="w-6 h-6 bg-[#FF6F00] rounded-full flex items-center justify-center flex-shrink-0">
+                <div className="w-6 h-6 bg-[#FF6F00] rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                     <polyline points="20 6 9 17 4 12"/>
                   </svg>
                 </div>
-                <span className="text-white/80">{feature.text}</span>
+                <div>
+                  <h3 className="text-white font-semibold">{feature.title}</h3>
+                  <p className="text-white/60 text-sm mt-0.5">{feature.description}</p>
+                </div>
               </motion.div>
             ))}
           </motion.div>

@@ -5,7 +5,7 @@ import { createMetadata } from "@/lib/seo";
 export const metadata: Metadata = createMetadata({
   title: "For Instructors - Teach With Us",
   description:
-    "Join our team of expert instructors. Share your knowledge, reach thousands of learners, and earn while teaching what you love. Coming soon to LKnight Learning Hub.",
+    "Join our team of expert instructors. Share your knowledge, reach a growing community of leaders, and earn while teaching what you love. Coming soon to LKnight Learning Hub.",
   keywords: ["become instructor", "teach online", "create courses", "instructor program"],
   canonical: "/instructors",
 });

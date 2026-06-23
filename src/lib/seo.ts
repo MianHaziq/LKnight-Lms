@@ -5,7 +5,7 @@ export const siteConfig = {
   name: "LKnight Learning Hub",
   shortName: "LKnight LMS",
   description:
-    "Master new skills with expert-led courses. LKnight Learning Hub by LKnight Productions offers 500+ professional courses in leadership, technology, and business designed for executives and career-focused learners in Spring, Texas and worldwide.",
+    "Master new skills with expert-led courses. LKnight Learning Hub by LKnight Productions offers professional courses in leadership, communication, and team development, designed for executives and career-focused learners in Spring, Texas.",
   url: "https://www.lknightlearninghub.com",
   ogImage: "/og-image.jpg",
   creator: "LKnight Productions",

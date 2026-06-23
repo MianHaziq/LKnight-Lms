@@ -4,7 +4,7 @@ import { createMetadata } from "@/lib/seo";
 export const metadata: Metadata = createMetadata({
   title: "Sign Up - Create Your Free Account",
   description:
-    "Create a free LKnight Learning Hub account. Access 500+ expert-led courses, earn certificates, and join our global learning community.",
+    "Create a free LKnight Learning Hub account. Access expert-led leadership courses, earn certificates, and join our learning community.",
   keywords: [
     "sign up",
     "register",

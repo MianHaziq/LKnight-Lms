@@ -59,9 +59,9 @@ export default function HeroSection() {
 
           {/* Description */}
           <p className="text-white/80 text-center text-sm sm:text-base lg:text-lg max-w-xs sm:max-w-lg lg:max-w-2xl mb-6 sm:mb-8 px-2">
-            Join thousands of learners and gain access to world-class courses,
-            expertly designed to help you master new skills and advance your
-            career.
+            Gain access to world-class leadership courses, expertly designed to
+            help you master new skills, lead with clarity, and grow with
+            confidence.
           </p>
 
           {/* CTA Buttons */}
